@@ -31,13 +31,14 @@ function agregarFigura() {
     let posX = Math.round(Math.random() * canvasWidth);
     let posY = Math.round(Math.random() * canvasHeight);
     let color = randomColor();
+    let colorComplementario = getComplementaryColor(color);
  
     if (figuras.length<(CANT_FIGURAS/3)) {
         let circulo = new Circulo(posX, posY, Math.round(Math.random() * 100 + 10), color, ctx, false);
         figuras.push(circulo);
     } else if(figuras.length<(CANT_FIGURAS/3*2)) {
         let rectangulo = new Rectangulo(posX, posY, Math.round(Math.random() * 100 + 10),
-        Math.round(Math.random() * 200 + 5),  color, ctx, false);
+        Math.round(Math.random() * 200 + 5),  colorComplementario, ctx, false);
         figuras.push(rectangulo); 
     }else{let cuadrado = new Cuadrado(posX, posY, Math.round(Math.random() * 100+ 10), color, ctx, false);
         figuras.push(cuadrado);
@@ -54,6 +55,21 @@ function randomColor() {
     return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
+function getComplementaryColor(color) {
+    // Extrae los valores RGB del color
+    let rgba = color.match(/\d+/g);
+    let r = parseInt(rgba[0]);
+    let g = parseInt(rgba[1]);
+    let b = parseInt(rgba[2]);
+
+    // Calcula el color complementario
+    let rComp = 255 - r;
+    let gComp = 255 - g;
+    let bComp = 255 - b;
+    return `rgba(${rComp}, ${gComp}, ${bComp}, ${rgba[3]})`; 
+}
+
+
 
 function actualizar(){
     pintarCanvas(); 
@@ -61,7 +77,6 @@ function actualizar(){
     for(let i = 0; i < figuras.length; i++){
         figuras[i].draw(); 
     }
-
 }
 
 
@@ -77,7 +92,7 @@ for (let i = figuras.length - 1; i >= 0; i--) {
         for (let f of figuras) {
             f.seleccionada = false; // Deseleccionar todas
         }
-        objetoActual.seleccionada = true; // Seleccionar la actua
+        objetoActual.seleccionada = true; // Seleccionar la actual
 
         figuras.splice(i, 1);
         figuras.push(objetoActual);
@@ -91,7 +106,6 @@ if (!objetoActual.seleccionada) {
         f.seleccionada = false;
     }
 }
-
 actualizar();
 
 
@@ -112,7 +126,13 @@ canvas.addEventListener('mouseup', (e) => {
         objetoActual.seleccionada = false;
     }
 })
-
+canvas.addEventListener('mouseleave', () => {
+    if (mouseDown && objetoActual) {
+        mouseDown = false;
+        objetoActual.seleccionada = false; // Deselecciona la figura
+        actualizar(); 
+    }
+});
 
 document.addEventListener('keydown', (e) => {
     let pos = getMousePos(e);
@@ -133,7 +153,7 @@ document.addEventListener('keydown', (e) => {
          objetoActual.moveTo(objetoActual.posX + step, objetoActual.posY );
           break;
       }
-  
+
         actualizar();
     }
   });
